@@ -1,26 +1,320 @@
 @import "tailwindcss";
 
+/* Color system */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #111111;
+  --accent: #0a84ff; /* iOS blue */
+  --radius: 14px;
+  --gradient: #ffffff;
+  --gradient-dark: #ffffff;
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 2px 6@keyframes field-glow {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.3);
+    opacity: 0.7;
+  }
+}ba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 24px -6px rgba(0, 0, 0, 0.12);
+
+  --font-sans: var(--font-doto, var(--font-roboto, system-ui, sans-serif));
+  --font-display: var(--font-doto, var(--font-roboto));
+  --font-mono: var(--font-geist-mono, ui-monospace, monospace);
+
+  /* Fluid type scale */
+  --step--1: clamp(0.75rem, 0.74rem + 0.05vw, 0.8rem);
+  --step-0: clamp(0.94rem, 0.9rem + 0.2vw, 1rem);
+  --step-1: clamp(1.15rem, 1.05rem + 0.6vw, 1.35rem);
+  --step-2: clamp(1.35rem, 1.18rem + 1vw, 1.7rem);
+  --step-3: clamp(1.7rem, 1.48rem + 1.4vw, 2.2rem);
+  --step-4: clamp(2.05rem, 1.75rem + 2vw, 2.8rem);
+  --step-5: clamp(2.6rem, 2.2rem + 3vw, 3.6rem);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #111111;
   }
 }
 
 body {
-  background: var(--background);
+  min-height: 100dvh;
+  background: var(--gradient);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-size: var(--step-0);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: var(--gradient-dark);
+  }
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+h1 {
+  font-size: var(--step-5);
+  line-height: 1.05;
+}
+h2 {
+  font-size: var(--step-3);
+  line-height: 1.1;
+}
+h3 {
+  font-size: var(--step-2);
+}
+p {
+  font-size: var(--step-0);
+  max-width: 62ch;
+}
+small {
+  font-size: var(--step--1);
+}
+
+/* Layout helpers */
+.wrapper {
+  width: 100%;
+  padding-inline: clamp(1rem, 4vw, 3rem);
+  margin-inline: 0;
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 2vw, 3rem);
+}
+.cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.1rem;
+}
+
+/* Card / panel */
+.panel {
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+  border-radius: calc(var(--radius) - 4px);
+  padding: 1.25rem 1.4rem;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.75),
+    rgba(255, 255, 255, 0.55)
+  );
+  backdrop-filter: blur(18px) saturate(180%);
+  box-shadow: var(--shadow-xs);
+  transition: border-color 0.4s var(--ease), box-shadow 0.4s var(--ease),
+    transform 0.5s var(--ease);
+}
+@media (prefers-color-scheme: dark) {
+  .panel {
+    background: linear-gradient(
+      145deg,
+      rgba(32, 32, 32, 0.65),
+      rgba(18, 18, 18, 0.6)
+    );
+    box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.06), var(--shadow-xs);
+  }
+}
+.panel:hover {
+  border-color: color-mix(in srgb, var(--foreground) 22%, transparent);
+  box-shadow: var(--shadow-sm);
+}
+.panel:active {
+  transform: translateY(2px);
+}
+
+/* Buttons */
+button,
+.button {
+  font: inherit;
+  padding: 0.7rem 1.15rem;
+  border-radius: 999px;
+  background: var(--foreground);
+  color: var(--background);
+  border: none;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  box-shadow: 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  transition: background 0.4s var(--ease), color 0.4s var(--ease),
+    box-shadow 0.4s var(--ease), transform 0.45s var(--ease);
+}
+button:hover,
+.button:hover {
+  background: color-mix(in srgb, var(--foreground) 90%, black);
+}
+button:active,
+.button:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+@media (prefers-color-scheme: dark) {
+  button,
+  .button {
+    background: #e8e8e8;
+    color: #111;
+  }
+  button:hover,
+  .button:hover {
+    background: #ffffff;
+  }
+}
+
+/* Links */
+a {
+  color: inherit;
+  text-decoration: none;
+  position: relative;
+}
+a.inline-link {
+  color: var(--accent);
+}
+a.inline-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0.2);
+  transform-origin: left;
+  transition: transform 0.5s var(--ease);
+}
+a.inline-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* Subtle fade-in */
+[data-fade] {
+  opacity: 0;
+  animation: fadeIn 0.9s var(--ease) forwards;
+}
+[data-fade="1"] {
+  animation-delay: 0.05s;
+}
+[data-fade="2"] {
+  animation-delay: 0.15s;
+}
+[data-fade="3"] {
+  animation-delay: 0.3s;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  [data-fade] {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Utilities */
+.muted {
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+}
+.accent {
+  color: var(--accent);
+}
+.divider {
+  height: 1px;
+  background: color-mix(in srgb, var(--foreground) 15%, transparent);
+  width: 100%;
+  margin: 2.5rem 0;
+}
+
+/* Selection tweak for panels */
+.panel ::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Typing caret */
+.typing-caret {
+  display: inline-block;
+  width: 0.2ch;
+  margin-left: 0.1ch;
+  background: currentColor;
+  height: 0.9em;
+  translate: 0 0.08em;
+  animation: caretBlink 1.05s steps(1, end) infinite;
+  border-radius: 1px;
+}
+@keyframes caretBlink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Custom Cursor */
+html, body, *, *::before, *::after {
+  cursor: none !important;
+}
+
+/* Force cursor none on all interactive elements */
+a, button, .button, input, textarea, select, [role="button"], [onclick] {
+  cursor: none !important;
+}
+
+.custom-cursor {
+  position: fixed;
+  width: 32px;
+  height: 32px;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url('/cursor.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: transform 0.1s ease;
+  transform: translate(-16px, -16px);
+}
+
+.custom-cursor.hover {
+  transform: translate(-16px, -16px) scale(1.2);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  * {
+    cursor: auto !important;
+  }
+
+  .custom-cursor,
+  .custom-cursor-dot {
+    display: none;
+  }
 }
