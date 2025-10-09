@@ -272,7 +272,12 @@ export default function HomePage() {
                   that genuinely help and empower people! In my free time I
                   enjoy cinematography 📸, hiking 🥾, trying out new tech 👾,
                   driving 🏎️ and running 🏃. Im proficient in Russian and
-                  English but can also do French, Polish, and Belarusian.
+                  English but can also do French, Polish, and Belarusian. The
+                  purpose of this website is to be the primary hub for
+                  everything I do, here you can find my articles, courses,
+                  videos, photos, projects, publishings, etc. You can also find
+                  links and sources to get in contact if you ever want to chat!
+                  I'm always up for a good convo over some coffee.
                 </p>
               </div>
 
