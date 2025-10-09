@@ -128,6 +128,80 @@ function useTypewriter(text: string, speed = 40) {
   return output;
 }
 
+// Add SocialLinks component (placed before the default export)
+const SocialLinks = () => {
+  const [hovered, setHovered] = useState<number | null>(null);
+
+  const links: {
+    href: string;
+    label: string;
+    color: string;
+    icon: React.ReactNode;
+  }[] = [
+    {
+      href: "https://github.com/",
+      label: "GitHub",
+      color: "#181717",
+      icon: <Image src="/githubicon.png" alt="GitHub" width={18} height={18} />,
+    },
+    {
+      href: "https://www.youtube.com/",
+      label: "YouTube",
+      color: "#FF0000",
+      icon: <Image src="/youtube.png" alt="YouTube" width={18} height={18} />,
+    },
+    {
+      href: "https://linkedin.com/",
+      label: "LinkedIn",
+      color: "#0A66C2",
+      icon: (
+        <Image src="/linkedicon.png" alt="LinkedIn" width={18} height={18} />
+      ),
+    },
+    {
+      href: "https://instagram.com/",
+      label: "Instagram",
+      color: "#E1306C",
+      icon: (
+        <Image src="/instagram.png" alt="Instagram" width={18} height={18} />
+      ),
+    },
+  ];
+
+  return (
+    <div
+      className="absolute left-1/2 -translate-x-1/2 flex gap-3"
+      style={{ zIndex: 10, bottom: -20 }}
+    >
+      {links.map((l, i) => (
+        <a
+          key={l.label}
+          href={l.href}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={l.label}
+          onMouseEnter={() => setHovered(i)}
+          onMouseLeave={() => setHovered(null)}
+          className="flex items-center justify-center"
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 9999,
+            background: "rgba(255,255,255,0.04)",
+            border: "2px solid transparent",
+            transition: "box-shadow .18s, border-color .18s, transform .12s",
+            boxShadow: hovered === i ? `0 0 0 6px ${l.color}22` : undefined,
+            borderColor: hovered === i ? l.color : "transparent",
+            color: "var(--text, currentColor)",
+          }}
+        >
+          {l.icon}
+        </a>
+      ))}
+    </div>
+  );
+};
+
 export default function HomePage() {
   const typed = useTypewriter("Hello world, I'm Val");
   return (
@@ -163,6 +237,9 @@ export default function HomePage() {
                   className="object-cover grayscale"
                 />
               </div>
+
+              {/* Replace empty div with social icons overlay */}
+              <SocialLinks />
             </div>
           </div>
         </header>
@@ -172,13 +249,44 @@ export default function HomePage() {
           <div className="divider" />
 
           {/* About */}
-          <Section id="about" title="About" fade="1">
-            <p className="muted" data-fade="2">
-              I enjoy systems thinking, subtle polish, and reducing complex
-              flows into something that feels obvious. Tools I like right now:
-              Next.js, TypeScript, PostCSS, CSS variables, and tiny composable
-              components.
-            </p>
+          <Section id="about" title="About">
+            {/* reduced height (~half) and justify image to the far right on md+ */}
+            <div className="muted flex flex-col md:flex-row items-stretch md:justify-between gap-6 md:min-h-[260px] lg:min-h-[320px]">
+              {/* column for tags above paragraph */}
+              <div className="flex-1 flex flex-col">
+                <div className="flex gap-3 mb-3">
+                  <span className="inline-block text-[16px] font-medium px-3 py-1 rounded-[5px] bg-red-600 text-white">
+                    Belarusian
+                  </span>
+                  <span className="inline-block text-[16px] font-medium px-3 py-1 rounded-[5px] bg-blue-600 text-white">
+                    Duke 2028
+                  </span>
+                </div>
+
+                <p className="flex-1">
+                  Im originally from Belarus ⬜️🟥⬜️, now based in the United
+                  States 🇺🇸 Im currently an undergrad at Duke University 💙
+                  studying Computer Science 💻, Mathematics 🧮, and Psychology
+                  👨‍⚕️ Ive been developing web and mobile application since middle
+                  school and am particularly passionate about building tools
+                  that genuinely help and empower people! In my free time I
+                  enjoy cinematography 📸, hiking 🥾, trying out new tech 👾,
+                  driving 🏎️ and running 🏃. Im proficient in Russian and
+                  English but can also do French, Polish, and Belarusian.
+                </p>
+              </div>
+
+              {/* Right-side image — pushed to the far right and fills the about height */}
+              <div className="relative w-full md:w-[520px] lg:w-[720px] flex-shrink-0 self-stretch ml-auto">
+                <Image
+                  src="/IMG_2880.JPG"
+                  alt="IMG_2880"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 520px, 720px"
+                  className="object-cover rounded-lg border border-foreground/10 shadow-sm"
+                />
+              </div>
+            </div>
           </Section>
 
           <div className="divider" />
@@ -204,34 +312,6 @@ export default function HomePage() {
           </Section>
 
           <div className="divider" />
-
-          {/* Contact */}
-          <Section id="contact" title="Contact" fade="1">
-            <div className="cluster" data-fade="2">
-              <a className="inline-link" href="mailto:hello@example.com">
-                Email
-              </a>
-              <a
-                className="inline-link"
-                href="https://github.com/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                GitHub
-              </a>
-              <a
-                className="inline-link"
-                href="https://linkedin.com/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                LinkedIn
-              </a>
-            </div>
-            <small className="muted" data-fade="3">
-              © {new Date().getFullYear()} Valk. Built with Next.js.
-            </small>
-          </Section>
         </div>
       </div>
     </>
