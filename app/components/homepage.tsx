@@ -27,19 +27,74 @@ type Project = {
   description: string;
   link?: string;
   tag?: string;
+  tags?: string[];
 };
 
 const projects: Project[] = [
   {
-    title: "Portfolio Shell",
+    title: "Statistical Approach to Track-flation and Estimates of World Records",
     description:
-      "The minimal foundation of this site. Accessible, fast, zero fluff.",
-    tag: "WIP",
+      "Midterm research exploring how region, age, and physiology influence track times, featuring predictive models for future world records with collaborators Nico Zapeda and Rian Sharp.",
+    tags: [
+      "School Project",
+      "Machine Learning",
+      "Statistics",
+      "Duke co28",
+      "Duke co28",
+    ],
   },
   {
-    title: "Design Tokens",
+    title: "DAML Online Platform",
     description:
-      "A tiny adaptive design token system using modern CSS primitives.",
+      "Building a unified web experience for Duke Applied Machine Learning covering curriculum, consulting, simulations, and communications with partner Renzo Larrea.",
+    tags: [
+      "School Club",
+      "Web Development",
+      "Web Architecture",
+      "Duke co28",
+    ],
+  },
+  {
+    title: "Nike Oregon Project",
+    description:
+      "Reimagining Nike’s Oregon Project with advanced data feedback loops on form, efficiency, nutrition, and physiology for superhuman training insights.",
+    tags: [
+      "Personal Project",
+      "Web Architecture",
+      "Machine Learning",
+      "Data Science",
+    ],
+  },
+  {
+    title: "Swift App for NetNutrition",
+    description:
+      "Mobile app that scrapes Duke dining macros, pairs them with GPT-5 meal planning, and ships via a Swift iOS front end for effortless tracking.",
+    tags: [
+      "Personal Project",
+      "Mobile Application",
+      "Machine Learning",
+      "Data Science",
+    ],
+  },
+  {
+    title: "Personal Website",
+    description:
+      "You’re on it—my living digital hub that stays in sync with the work, stories, and experiments I care about most.",
+    tags: ["Personal Project", "Web Development", "Web Architecture"],
+  },
+  {
+    title: "Noted",
+    description:
+      "Cross-platform note system for STEM majors that combines Gemini 2.5 Flash, Desmos, and spaced-recall tactics with deep integrations across iCloud, Drive, Notion, and Obsidian.",
+    tags: [
+      "Personal Project",
+      "Web Development",
+      "Web Architecture",
+      "Mobile Application",
+      "Machine Learning",
+      "Data Science",
+      "Psychology",
+    ],
   },
 ];
 
@@ -50,19 +105,28 @@ const ProjectCard = ({ p, index }: { p: Project; index: number }) => (
     data-fade={String(index + 1)}
     aria-label={p.link ? `${p.title} project` : undefined}
   >
-    <div className="cluster items-start justify-between mb-1">
-      <h3 className="m-0 text-[clamp(1.05rem,1rem+0.4vw,1.25rem)] font-medium">
-        {p.title}
-      </h3>
-      {p.tag && (
-        <span className="text-[10px] tracking-wide uppercase px-2 py-[2px] rounded-full bg-foreground/10 dark:bg-white/10 backdrop-blur-sm">
-          {p.tag}
-        </span>
+    <div className="flex flex-col gap-3">
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="m-0 text-[clamp(1.05rem,1rem+0.4vw,1.25rem)] font-medium">
+          {p.title}
+        </h3>
+      </div>
+      {p.tags && p.tags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {p.tags.map((tag, tagIndex) => (
+            <span
+              key={`${p.title}-tag-${tag}-${tagIndex}`}
+              className={`project-chip ${tag.toLowerCase().includes("duke co28") ? "project-chip-duke" : "project-chip-default"}`}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
       )}
+      <p className="m-0 text-[var(--step--1)] leading-snug opacity-80">
+        {p.description}
+      </p>
     </div>
-    <p className="m-0 text-[var(--step--1)] leading-snug opacity-80">
-      {p.description}
-    </p>
   </a>
 );
 

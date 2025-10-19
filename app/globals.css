@@ -148,6 +148,30 @@ small {
   transform: translateY(2px);
 }
 
+.project-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background: rgba(17, 24, 39, 0.08);
+  color: rgba(17, 24, 39, 0.78);
+}
+
+.project-chip-default {
+  background: rgba(17, 24, 39, 0.08);
+  color: rgba(17, 24, 39, 0.75);
+}
+
+.project-chip-duke {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #f8fafc;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
 /* Buttons */
 button,
 .button {
