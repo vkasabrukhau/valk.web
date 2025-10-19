@@ -28,6 +28,7 @@ type Project = {
   link?: string;
   tag?: string;
   tags?: string[];
+  layout?: string;
 };
 
 const projects: Project[] = [
@@ -35,72 +36,57 @@ const projects: Project[] = [
     title: "Statistical Approach to Track-flation and Estimates of World Records",
     description:
       "Midterm research exploring how region, age, and physiology influence track times, featuring predictive models for future world records with collaborators Nico Zapeda and Rian Sharp.",
-    tags: [
-      "School Project",
-      "Machine Learning",
-      "Statistics",
-      "Duke co28",
-      "Duke co28",
-    ],
-  },
-  {
-    title: "DAML Online Platform",
-    description:
-      "Building a unified web experience for Duke Applied Machine Learning covering curriculum, consulting, simulations, and communications with partner Renzo Larrea.",
-    tags: [
-      "School Club",
-      "Web Development",
-      "Web Architecture",
-      "Duke co28",
-    ],
-  },
-  {
-    title: "Nike Oregon Project",
-    description:
-      "Reimagining Nike’s Oregon Project with advanced data feedback loops on form, efficiency, nutrition, and physiology for superhuman training insights.",
-    tags: [
-      "Personal Project",
-      "Web Architecture",
-      "Machine Learning",
-      "Data Science",
-    ],
-  },
-  {
-    title: "Swift App for NetNutrition",
-    description:
-      "Mobile app that scrapes Duke dining macros, pairs them with GPT-5 meal planning, and ships via a Swift iOS front end for effortless tracking.",
-    tags: [
-      "Personal Project",
-      "Mobile Application",
-      "Machine Learning",
-      "Data Science",
-    ],
-  },
-  {
-    title: "Personal Website",
-    description:
-      "You’re on it—my living digital hub that stays in sync with the work, stories, and experiments I care about most.",
-    tags: ["Personal Project", "Web Development", "Web Architecture"],
+    tags: ["School project", "Machine learning", "Statistics"],
+    layout: "project-span-4x3",
   },
   {
     title: "Noted",
     description:
       "Cross-platform note system for STEM majors that combines Gemini 2.5 Flash, Desmos, and spaced-recall tactics with deep integrations across iCloud, Drive, Notion, and Obsidian.",
     tags: [
-      "Personal Project",
-      "Web Development",
-      "Web Architecture",
-      "Mobile Application",
-      "Machine Learning",
-      "Data Science",
+      "Personal project",
+      "Web development",
+      "Web architecture",
+      "Mobile application",
+      "Machine learning",
+      "Data science",
       "Psychology",
     ],
+    layout: "project-span-3x2",
+  },
+  {
+    title: "DAML Online Platform",
+    description:
+      "Building a unified web experience for Duke Applied Machine Learning covering curriculum, consulting, simulations, and communications with partner Renzo Larrea.",
+    tags: ["School club", "Web development", "Web architecture"],
+    layout: "project-span-3x2",
+  },
+  {
+    title: "Nike Oregon Project",
+    description:
+      "Reimagining Nike’s Oregon Project with advanced data feedback loops on form, efficiency, nutrition, and physiology for superhuman training insights.",
+    tags: ["Personal project", "Web architecture", "Machine learning", "Data science"],
+    layout: "project-span-3x2",
+  },
+  {
+    title: "Swift App for NetNutrition",
+    description:
+      "Mobile app that scrapes Duke dining macros, pairs them with GPT-5 meal planning, and ships via a Swift iOS front end for effortless tracking.",
+    tags: ["Personal project", "Mobile application", "Machine learning", "Data science"],
+    layout: "project-span-3x2",
+  },
+  {
+    title: "Personal Website",
+    description:
+      "You’re on it—my living digital hub that stays in sync with the work, stories, and experiments I care about most.",
+    tags: ["Personal project", "Web development", "Web architecture"],
+    layout: "project-span-3x2",
   },
 ];
 
 const ProjectCard = ({ p, index }: { p: Project; index: number }) => (
   <a
-    className="panel block no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[--accent]"
+    className={`panel project-card block no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[--accent] ${p.layout ?? "project-span-2x2"}`}
     href={p.link || "#"}
     data-fade={String(index + 1)}
     aria-label={p.link ? `${p.title} project` : undefined}
@@ -112,11 +98,11 @@ const ProjectCard = ({ p, index }: { p: Project; index: number }) => (
         </h3>
       </div>
       {p.tags && p.tags.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {p.tags.map((tag, tagIndex) => (
             <span
               key={`${p.title}-tag-${tag}-${tagIndex}`}
-              className={`project-chip ${tag.toLowerCase().includes("duke co28") ? "project-chip-duke" : "project-chip-default"}`}
+              className="project-chip project-chip-default"
             >
               {tag}
             </span>
@@ -372,21 +358,10 @@ export default function HomePage() {
 
           {/* Projects */}
           <Section id="projects" title="Current Projects" fade="1">
-            <div
-              className="grid gap-4 md:gap-6"
-              style={{
-                gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))",
-              }}
-            >
+            <div className="project-grid">
               {projects.map((p, i) => (
                 <ProjectCard key={p.title} p={p} index={i} />
               ))}
-              <div
-                className="panel flex items-center justify-center text-center text-[12px] tracking-wide uppercase opacity-60"
-                data-fade="4"
-              >
-                More soon
-              </div>
             </div>
           </Section>
 
