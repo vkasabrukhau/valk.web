@@ -2,54 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Doto } from "next/font/google";
-import { Roboto } from "next/font/google";
+import CustomCursor from "./custom-cursor";
 
 const doto = Doto({ subsets: ["latin"], weight: ["400", "500", "700"] });
-const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"] });
-
-// Custom Cursor Component
-const CustomCursor = () => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isHover, setIsHover] = useState(false);
-
-  useEffect(() => {
-    const updateCursor = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
-    };
-
-    const updateHoverState = () => {
-      const hoveredElement = document.elementFromPoint(position.x, position.y);
-      if (hoveredElement) {
-        const isInteractive =
-          hoveredElement.tagName === "A" ||
-          hoveredElement.tagName === "BUTTON" ||
-          hoveredElement.classList.contains("button") ||
-          hoveredElement.getAttribute("role") === "button" ||
-          (hoveredElement as HTMLElement).onclick !== null;
-        setIsHover(isInteractive);
-      }
-    };
-
-    window.addEventListener("mousemove", updateCursor);
-    window.addEventListener("mouseover", updateHoverState);
-
-    return () => {
-      window.removeEventListener("mousemove", updateCursor);
-      window.removeEventListener("mouseover", updateHoverState);
-    };
-  }, [position]);
-
-  return (
-    <div
-      className={`custom-cursor ${isHover ? "hover" : ""}`}
-      style={{
-        left: position.x,
-        top: position.y,
-      }}
-    />
-  );
-};
 
 type SectionProps = {
   id?: string;
@@ -107,6 +64,59 @@ const ProjectCard = ({ p, index }: { p: Project; index: number }) => (
       {p.description}
     </p>
   </a>
+);
+
+type Destination = {
+  title: string;
+  description: string;
+  href: string;
+  accent: string;
+  meta: string;
+};
+
+const featureDestinations: Destination[] = [
+  {
+    title: "My Running Shoes",
+    description:
+      "A timeline of every trainer and racer with mileage, lifespan, and state-side stories.",
+    href: "/running-shoes",
+    accent: "linear-gradient(135deg, #ff915b, #ff4d6d)",
+    meta: "Mileage archive",
+  },
+  {
+    title: "ValK.JPEG",
+    description:
+      "A modular gallery for film stills, drone sweeps, and race-day captures.",
+    href: "/gallery",
+    accent: "linear-gradient(135deg, #6c63ff, #37d5d6)",
+    meta: "Media vault",
+  },
+];
+
+const DestinationNode = ({
+  destination,
+  index,
+}: {
+  destination: Destination;
+  index: number;
+}) => (
+  <Link
+    href={destination.href}
+    className="destination-node cinematic-reveal"
+    style={{
+      backgroundImage: destination.accent,
+      animationDelay: `${index * 0.08}s`,
+    }}
+  >
+    <div className="node-meta-row">
+      <span className="node-pill">{destination.meta}</span>
+      <span className="node-arrow" aria-hidden="true">
+        →
+      </span>
+    </div>
+    <h3>{destination.title}</h3>
+    <p>{destination.description}</p>
+  </Link>
 );
 
 // Simple typing hook
@@ -277,7 +287,7 @@ export default function HomePage() {
                   everything I do, here you can find my articles, courses,
                   videos, photos, projects, publishings, etc. You can also find
                   links and sources to get in contact if you ever want to chat!
-                  I'm always up for a good convo over some coffee.
+                  I&apos;m always up for a good convo over some coffee.
                 </p>
               </div>
 
@@ -297,7 +307,7 @@ export default function HomePage() {
           <div className="divider" />
 
           {/* Projects */}
-          <Section id="projects" title="Selected Work" fade="1">
+          <Section id="projects" title="Current Projects" fade="1">
             <div
               className="grid gap-4 md:gap-6"
               style={{
@@ -313,6 +323,20 @@ export default function HomePage() {
               >
                 More soon
               </div>
+            </div>
+          </Section>
+
+          <div className="divider" />
+
+          <Section id="vault" title="Deep Dives" fade="2">
+            <div className="destination-grid">
+              {featureDestinations.map((destination, index) => (
+                <DestinationNode
+                  destination={destination}
+                  index={index}
+                  key={destination.href}
+                />
+              ))}
             </div>
           </Section>
 
