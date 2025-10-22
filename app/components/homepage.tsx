@@ -37,6 +37,21 @@ type Project = {
   stage: ProjectStage;
 };
 
+const getProjectCardSize = (project: Project) => {
+  const descriptionWords = project.description
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+  const titleWords = project.title.trim().split(/\s+/).filter(Boolean).length;
+  const tagWeight = (project.tags?.length ?? 0) * 6;
+  const score = descriptionWords + titleWords * 2 + tagWeight;
+
+  if (score > 110) return "project-card--expansive";
+  if (score > 80) return "project-card--roomy";
+  if (score > 55) return "project-card--comfortable";
+  return "project-card--compact";
+};
+
 const projects: Project[] = [
   {
     title:
@@ -133,9 +148,9 @@ const projects: Project[] = [
 
 const ProjectCard = ({ p, index }: { p: Project; index: number }) => (
   <a
-    className={`panel project-card block no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[--accent] ${
-      p.layout ?? "project-span-2x2"
-    }`}
+    className={`panel project-card block no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[--accent] ${getProjectCardSize(
+      p
+    )}`}
     href={p.link || "#"}
     data-fade={String(index + 1)}
     aria-label={p.link ? `${p.title} project` : undefined}
@@ -186,7 +201,8 @@ const featureDestinations: Destination[] = [
     description:
       "A timeline of every trainer and racer with mileage, lifespan, and state-side stories.",
     href: "/running-shoes",
-    accent: "linear-gradient(140deg, rgba(255, 177, 139, 0.9), rgba(255, 116, 132, 0.72))",
+    accent:
+      "linear-gradient(140deg, rgba(255, 177, 139, 0.9), rgba(255, 116, 132, 0.72))",
     meta: "Mileage archive",
   },
   {
@@ -194,7 +210,8 @@ const featureDestinations: Destination[] = [
     description:
       "A modular gallery for film stills, drone sweeps, and race-day captures.",
     href: "/gallery",
-    accent: "linear-gradient(140deg, rgba(130, 130, 255, 0.85), rgba(96, 214, 228, 0.68))",
+    accent:
+      "linear-gradient(140deg, rgba(130, 130, 255, 0.85), rgba(96, 214, 228, 0.68))",
     meta: "Media vault",
   },
 ];

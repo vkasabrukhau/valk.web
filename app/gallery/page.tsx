@@ -146,20 +146,48 @@ const flickrPattern: Array<{ rowSpan: number; colSpan: number }> = [
   { rowSpan: 3, colSpan: 1 },
 ];
 
-type FlickrFeedItem = {
+type FlickrApiItem = {
+  id: string;
   title: string;
-  link: string;
-  media: { m: string };
-  date_taken: string;
   description: string;
-  published: string;
-  author: string;
-  tags: string;
+  takenAt: string | null;
+  tags: string[];
+  ownerName: string;
+  ownerId: string;
+  image: string;
+  width: number | null;
+  height: number | null;
+  link: string;
 };
 
-type FlickrFeedResponse = {
-  items: FlickrFeedItem[];
+type FlickrApiResponse = {
+  items: FlickrApiItem[];
 };
+
+const sanitizeText = (value: string) =>
+  value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const deriveSpans = (item: FlickrApiItem, index: number) => {
+  if (item.width && item.height) {
+    const ratio = item.width / item.height;
+    if (ratio >= 1.8) {
+      return { rowSpan: 2, colSpan: 2 };
+    }
+    if (ratio >= 1.35) {
+      return { rowSpan: 3, colSpan: 2 };
+    }
+    if (ratio <= 0.9) {
+      return { rowSpan: 3, colSpan: 1 };
+    }
+  }
+  return flickrPattern[index % flickrPattern.length];
+};
+
+const formatResolution = (item: FlickrApiItem) =>
+  item.width && item.height ? `${item.width} × ${item.height}` : "—";
 
 const formatDate = (date: string) => {
   const parsed = new Date(date);
@@ -185,47 +213,41 @@ export default function GalleryPage() {
     const fetchFlickr = async () => {
       try {
         setFlickrStatus("loading");
-        const response = await fetch(
-          "https://www.flickr.com/services/feeds/photos_public.gne?format=json&id=203433981@N02&nojsoncallback=1"
-        );
-        if (!response.ok) {
-          throw new Error(`Flickr responded with ${response.status}`);
-        }
-        const data = (await response.json()) as FlickrFeedResponse;
-        if (ignore) return;
-        const items: GalleryItem[] = (data.items ?? []).slice(0, 12).map((item, index) => {
-          const { rowSpan, colSpan } = flickrPattern[index % flickrPattern.length];
-          const rawDescription = item.description || "";
-          const description = rawDescription
-            .replace(/<[^>]*>/g, " ")
-            .replace(/\s+/g, " ")
-            .trim();
-          const author =
-            item.author.match(/\("(.*)"\)/)?.[1] ?? "Flickr";
-          const captureDate = item.date_taken || item.published || new Date().toISOString();
-          const tags = item.tags
-            .split(" ")
-            .map((tag) => tag.trim())
-            .filter(Boolean)
-            .slice(0, 6);
-          const mediaUrl = item.media?.m ?? "";
-          const hiRes = mediaUrl.includes("_m.") ? mediaUrl.replace("_m.", "_b.") : mediaUrl;
-          return {
-            title: item.title || `Flickr Frame ${index + 1}`,
-            description: description || "Captured via Flickr feed.",
-            location: `Flickr • ${author}`,
-            capturedAt: captureDate,
-            resolution: "—",
-            device: "Flickr Upload",
-            mediaType: "Photo",
-            image: hiRes || mediaUrl,
-            tags,
-            rowSpan,
-            colSpan,
-            href: item.link || undefined,
-            source: "Flickr",
-          };
+        const response = await fetch("/api/flickr?per_page=12", {
+          cache: "no-store",
         });
+        if (!response.ok) {
+          const message = await response
+            .text()
+            .catch(() => `Flickr responded with ${response.status}`);
+          throw new Error(message);
+        }
+        const data = (await response.json()) as FlickrApiResponse;
+        if (ignore) return;
+        const items: GalleryItem[] = (data.items ?? [])
+          .map((item, index) => {
+            if (!item.image) return null;
+            const { rowSpan, colSpan } = deriveSpans(item, index);
+            const description = sanitizeText(item.description || "");
+            const captureDate = item.takenAt ?? new Date().toISOString();
+            const resolution = formatResolution(item);
+            return {
+              title: item.title || `Flickr Frame ${index + 1}`,
+              description: description || "Captured via Flickr feed.",
+              location: item.ownerName ? `Flickr • ${item.ownerName}` : "Flickr",
+              capturedAt: captureDate,
+              resolution,
+              device: "Flickr Upload",
+              mediaType: "Photo",
+              image: item.image,
+              tags: item.tags.slice(0, 6),
+              rowSpan,
+              colSpan,
+              href: item.link,
+              source: "Flickr",
+            };
+          })
+          .filter((entry): entry is GalleryItem => entry !== null);
         setFlickrItems(items);
         setFlickrStatus("ready");
         setFlickrError(null);
@@ -233,7 +255,9 @@ export default function GalleryPage() {
         if (ignore) return;
         console.error("Failed to load Flickr feed", error);
         setFlickrStatus("error");
-        setFlickrError("Flickr feed unavailable right now.");
+        setFlickrError(
+          error instanceof Error ? error.message : "Flickr feed unavailable right now."
+        );
       }
     };
 
