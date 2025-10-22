@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomCursor from "../components/custom-cursor";
 
 type MediaType = "Photo" | "Video";
@@ -17,9 +17,11 @@ type GalleryItem = {
   tags: string[];
   rowSpan: number;
   colSpan: number;
+  href?: string;
+  source?: "Static" | "Flickr";
 };
 
-const galleryItems: GalleryItem[] = [
+const staticGalleryItems: GalleryItem[] = [
   {
     title: "Blue Ridge Sunrise",
     description: "Trail run above the Parkway with rolling fog over the peaks.",
@@ -136,27 +138,126 @@ const galleryItems: GalleryItem[] = [
 
 const filterOptions = ["All", "Photos", "Videos"] as const;
 
-const formatDate = (date: string) =>
-  new Intl.DateTimeFormat("en-US", {
+const flickrPattern: Array<{ rowSpan: number; colSpan: number }> = [
+  { rowSpan: 3, colSpan: 2 },
+  { rowSpan: 2, colSpan: 1 },
+  { rowSpan: 4, colSpan: 2 },
+  { rowSpan: 2, colSpan: 1 },
+  { rowSpan: 3, colSpan: 1 },
+];
+
+type FlickrFeedItem = {
+  title: string;
+  link: string;
+  media: { m: string };
+  date_taken: string;
+  description: string;
+  published: string;
+  author: string;
+  tags: string;
+};
+
+type FlickrFeedResponse = {
+  items: FlickrFeedItem[];
+};
+
+const formatDate = (date: string) => {
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return "Date unknown";
+  return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
-  }).format(new Date(date));
+  }).format(parsed);
+};
 
 export default function GalleryPage() {
   const [activeFilter, setActiveFilter] =
     useState<(typeof filterOptions)[number]>("All");
   const [query, setQuery] = useState("");
+  const [flickrItems, setFlickrItems] = useState<GalleryItem[]>([]);
+  const [flickrStatus, setFlickrStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [flickrError, setFlickrError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let ignore = false;
+
+    const fetchFlickr = async () => {
+      try {
+        setFlickrStatus("loading");
+        const response = await fetch(
+          "https://www.flickr.com/services/feeds/photos_public.gne?format=json&id=203433981@N02&nojsoncallback=1"
+        );
+        if (!response.ok) {
+          throw new Error(`Flickr responded with ${response.status}`);
+        }
+        const data = (await response.json()) as FlickrFeedResponse;
+        if (ignore) return;
+        const items: GalleryItem[] = (data.items ?? []).slice(0, 12).map((item, index) => {
+          const { rowSpan, colSpan } = flickrPattern[index % flickrPattern.length];
+          const rawDescription = item.description || "";
+          const description = rawDescription
+            .replace(/<[^>]*>/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+          const author =
+            item.author.match(/\("(.*)"\)/)?.[1] ?? "Flickr";
+          const captureDate = item.date_taken || item.published || new Date().toISOString();
+          const tags = item.tags
+            .split(" ")
+            .map((tag) => tag.trim())
+            .filter(Boolean)
+            .slice(0, 6);
+          const mediaUrl = item.media?.m ?? "";
+          const hiRes = mediaUrl.includes("_m.") ? mediaUrl.replace("_m.", "_b.") : mediaUrl;
+          return {
+            title: item.title || `Flickr Frame ${index + 1}`,
+            description: description || "Captured via Flickr feed.",
+            location: `Flickr • ${author}`,
+            capturedAt: captureDate,
+            resolution: "—",
+            device: "Flickr Upload",
+            mediaType: "Photo",
+            image: hiRes || mediaUrl,
+            tags,
+            rowSpan,
+            colSpan,
+            href: item.link || undefined,
+            source: "Flickr",
+          };
+        });
+        setFlickrItems(items);
+        setFlickrStatus("ready");
+        setFlickrError(null);
+      } catch (error) {
+        if (ignore) return;
+        console.error("Failed to load Flickr feed", error);
+        setFlickrStatus("error");
+        setFlickrError("Flickr feed unavailable right now.");
+      }
+    };
+
+    fetchFlickr();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const combinedMedia = useMemo(
+    () => [...flickrItems, ...staticGalleryItems],
+    [flickrItems]
+  );
 
   const filteredMedia = useMemo(() => {
-    return galleryItems.filter((item) => {
+    return combinedMedia.filter((item) => {
       const matchesFilter =
         activeFilter === "All" || item.mediaType.toLowerCase() === activeFilter.toLowerCase();
       const haystack = `${item.title} ${item.description} ${item.location} ${item.tags.join(" ")}`.toLowerCase();
       const matchesQuery = haystack.includes(query.trim().toLowerCase());
       return matchesFilter && matchesQuery;
     });
-  }, [activeFilter, query]);
+  }, [activeFilter, query, combinedMedia]);
 
   return (
     <main className="gallery-page">
@@ -165,6 +266,17 @@ export default function GalleryPage() {
         <div className="gallery-brand">
           <span className="brand-wordmark">Valk.jpeg</span>
           <span className="brand-subtitle">Photos and videos of my adventures</span>
+          {flickrStatus !== "idle" && (
+            <span
+              className={`gallery-status ${
+                flickrStatus === "error" ? "gallery-status--error" : ""
+              }`}
+            >
+              {flickrStatus === "loading" && "Syncing Flickr feed..."}
+              {flickrStatus === "ready" && `Flickr sync • ${flickrItems.length} new frames`}
+              {flickrStatus === "error" && (flickrError ?? "Flickr feed unavailable")}
+            </span>
+          )}
         </div>
         <div className="controls-right">
           <div className="filter-group">
@@ -199,7 +311,7 @@ export default function GalleryPage() {
       <section className="gallery-masonry">
         {filteredMedia.map((item, index) => (
           <article
-            key={`${item.title}-${item.capturedAt}`}
+            key={item.href ?? `${item.title}-${item.capturedAt}`}
             className="gallery-tile cinematic-reveal"
             style={{
               gridRowEnd: `span ${item.rowSpan}`,
@@ -230,6 +342,16 @@ export default function GalleryPage() {
                     <span key={tag}>#{tag}</span>
                   ))}
                 </div>
+                {item.href && (
+                  <a
+                    className="overlay-link"
+                    href={item.href}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    View on Flickr
+                  </a>
+                )}
               </div>
             </div>
           </article>

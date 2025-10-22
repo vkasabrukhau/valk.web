@@ -22,21 +22,33 @@ export const Section = ({ id, title, children, fade }: SectionProps) => (
   </section>
 );
 
+type ProjectStage = {
+  label: string;
+  color: string;
+  tint: string;
+};
+
 type Project = {
   title: string;
   description: string;
   link?: string;
-  tag?: string;
   tags?: string[];
   layout?: string;
+  stage: ProjectStage;
 };
 
 const projects: Project[] = [
   {
-    title: "Statistical Approach to Track-flation and Estimates of World Records",
+    title:
+      "Statistical Approach to Track-flation and Estimates of World Records",
     description:
       "Midterm research exploring how region, age, and physiology influence track times, featuring predictive models for future world records with collaborators Nico Zapeda and Rian Sharp.",
     tags: ["School project", "Machine learning", "Statistics"],
+    stage: {
+      label: "Research Sprint",
+      color: "#5943d4",
+      tint: "rgba(89, 67, 212, 0.16)",
+    },
     layout: "project-span-4x3",
   },
   {
@@ -52,6 +64,11 @@ const projects: Project[] = [
       "Data science",
       "Psychology",
     ],
+    stage: {
+      label: "In Build",
+      color: "#f9735b",
+      tint: "rgba(249, 115, 91, 0.18)",
+    },
     layout: "project-span-3x2",
   },
   {
@@ -59,44 +76,83 @@ const projects: Project[] = [
     description:
       "Building a unified web experience for Duke Applied Machine Learning covering curriculum, consulting, simulations, and communications with partner Renzo Larrea.",
     tags: ["School club", "Web development", "Web architecture"],
-    layout: "project-span-3x2",
+    stage: {
+      label: "Beta Release",
+      color: "#2563eb",
+      tint: "rgba(37, 99, 235, 0.16)",
+    },
+    layout: "project-span-2x3",
   },
   {
     title: "Nike Oregon Project",
     description:
       "Reimagining Nike’s Oregon Project with advanced data feedback loops on form, efficiency, nutrition, and physiology for superhuman training insights.",
-    tags: ["Personal project", "Web architecture", "Machine learning", "Data science"],
-    layout: "project-span-3x2",
+    tags: [
+      "Personal project",
+      "Web architecture",
+      "Machine learning",
+      "Data science",
+    ],
+    stage: {
+      label: "Concept Lab",
+      color: "#d97706",
+      tint: "rgba(217, 119, 6, 0.18)",
+    },
+    layout: "project-span-3x3",
   },
   {
     title: "Swift App for NetNutrition",
     description:
       "Mobile app that scrapes Duke dining macros, pairs them with GPT-5 meal planning, and ships via a Swift iOS front end for effortless tracking.",
-    tags: ["Personal project", "Mobile application", "Machine learning", "Data science"],
-    layout: "project-span-3x2",
+    tags: [
+      "Personal project",
+      "Mobile application",
+      "Machine learning",
+      "Data science",
+    ],
+    stage: {
+      label: "Prototype",
+      color: "#0f9d58",
+      tint: "rgba(15, 157, 88, 0.18)",
+    },
+    layout: "project-span-2x2",
   },
   {
     title: "Personal Website",
     description:
       "You’re on it—my living digital hub that stays in sync with the work, stories, and experiments I care about most.",
     tags: ["Personal project", "Web development", "Web architecture"],
+    stage: {
+      label: "Live",
+      color: "#0891b2",
+      tint: "rgba(8, 145, 178, 0.18)",
+    },
     layout: "project-span-3x2",
   },
 ];
 
 const ProjectCard = ({ p, index }: { p: Project; index: number }) => (
   <a
-    className={`panel project-card block no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[--accent] ${p.layout ?? "project-span-2x2"}`}
+    className={`panel project-card block no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[--accent] ${
+      p.layout ?? "project-span-2x2"
+    }`}
     href={p.link || "#"}
     data-fade={String(index + 1)}
     aria-label={p.link ? `${p.title} project` : undefined}
+    style={
+      {
+        "--project-accent": p.stage.color,
+        "--project-accent-soft": p.stage.tint,
+      } as React.CSSProperties
+    }
   >
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4 h-full">
       <div className="flex items-start justify-between gap-3">
-        <h3 className="m-0 text-[clamp(1.05rem,1rem+0.4vw,1.25rem)] font-medium">
-          {p.title}
-        </h3>
+        <span className="project-stage-chip">{p.stage.label}</span>
       </div>
+      <h3 className="m-0 text-[clamp(1.05rem,1rem+0.4vw,1.25rem)] font-medium leading-tight">
+        {p.title}
+      </h3>
       {p.tags && p.tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {p.tags.map((tag, tagIndex) => (
@@ -130,7 +186,7 @@ const featureDestinations: Destination[] = [
     description:
       "A timeline of every trainer and racer with mileage, lifespan, and state-side stories.",
     href: "/running-shoes",
-    accent: "linear-gradient(135deg, #ff915b, #ff4d6d)",
+    accent: "linear-gradient(140deg, rgba(255, 177, 139, 0.9), rgba(255, 116, 132, 0.72))",
     meta: "Mileage archive",
   },
   {
@@ -138,7 +194,7 @@ const featureDestinations: Destination[] = [
     description:
       "A modular gallery for film stills, drone sweeps, and race-day captures.",
     href: "/gallery",
-    accent: "linear-gradient(135deg, #6c63ff, #37d5d6)",
+    accent: "linear-gradient(140deg, rgba(130, 130, 255, 0.85), rgba(96, 214, 228, 0.68))",
     meta: "Media vault",
   },
 ];
@@ -367,7 +423,7 @@ export default function HomePage() {
 
           <div className="divider" />
 
-          <Section id="vault" title="Deep Dives" fade="2">
+          <Section id="vault" title="My 'Special Interests'" fade="2">
             <div className="destination-grid">
               {featureDestinations.map((destination, index) => (
                 <DestinationNode
